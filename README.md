@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Food Redistribution and Expiration Tracking System
 
 > **DBMS Experiential Learning — Level 3 Project**  
