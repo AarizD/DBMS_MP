@@ -1,0 +1,300 @@
+================================================================================
+FOOD REDISTRIBUTION & EXPIRATION TRACKING SYSTEM - PROJECT FILES LOG
+DBMS Experiential Learning - Level 3 Project (Section 5-F)
+Team: Aariz D (PES1UG24AM330) & Shridhar G (PES1UG25AM814)
+================================================================================
+
+This file tracks all files added to the project, their location, and their
+functional purpose.
+
+--------------------------------------------------------------------------------
+1. CONFIGURATION & ENVIRONMENT FILES
+--------------------------------------------------------------------------------
+
+- .env.example
+  Template for environment variables. Defines DATABASE_URL (for localhost and
+  Docker container networks), NEXTAUTH_SECRET, and PORT so team members on Mac
+  and Windows have identical configurations.
+
+- .env.local
+  Active local environment file containing actual runtime variables for the
+  local PostgreSQL instance and Next.js server. Excluded from git.
+
+- .gitattributes
+  Cross-platform Git configuration enforcing Unix line endings (eol=lf).
+  Prevents line-ending corruption (CRLF vs LF) when sharing code between macOS
+  and Windows teammates.
+
+- .gitignore
+  Specifies untracked files and folders to keep the repository clean (e.g.,
+  node_modules/, .next/, .env*.local, and OS metadata files like .DS_Store).
+
+- docker-compose.yml
+  Docker Compose orchestration file. Launches PostgreSQL 16 with the pre-compiled
+  pgvector extension (image: pgvector/pgvector:pg16) on port 5432, mounts
+  database/init.sql for auto-initialization, and sets up a persistent data volume.
+
+- package.json
+  Project manifest defining application metadata, npm scripts (dev, build,
+  start, db:up, db:down, db:logs), and dependencies (Next.js 14, pg,
+  @xenova/transformers, bcryptjs, lucide-react, Tailwind CSS).
+
+- package-lock.json
+  Dependency lockfile guaranteeing exact dependency versions across all
+  developer machines and CI/CD environments.
+
+- tsconfig.json
+  TypeScript configuration configuring compiler options, strict type checking,
+  and module resolution path aliases (@/* pointing to ./src/*).
+
+- next.config.mjs
+  Next.js framework configuration. Configures serverComponentsExternalPackages
+  for 'pg' and '@xenova/transformers' so native C++ bindings and transformers run
+  seamlessly on the server side.
+
+- postcss.config.mjs
+  PostCSS processor configuration enabling Tailwind CSS and Autoprefixer.
+
+- tailwind.config.ts
+  Tailwind CSS styling configuration defining scanning paths (pages, components,
+  app) and design tokens.
+
+- README.md
+  Comprehensive project documentation detailing system architecture, quick-start
+  guides for macOS and Windows, Docker setup commands, and evaluation rubric
+  checkpoints.
+
+- FILES_LOG.txt
+  Log file maintaining an up-to-date registry of all project files and their
+  functional summaries.
+
+--------------------------------------------------------------------------------
+2. DATABASE FILES (database/)
+--------------------------------------------------------------------------------
+
+- database/init.sql
+  Primary PostgreSQL initialization script. Executed automatically on Docker's
+  first startup. Contains:
+    * 'vector' extension activation for pgvector.
+    * 12 normalized relational tables (USERS, FOOD_DONATORS, FOOD, FOOD_BANKS,
+      TRANSPORT, FOOD_BATCHES, CLAIMS, DELIVERIES, ROUTINES,
+      WASTE_AUDIT_RECORDS, FEEDBACK, LOGS).
+    * HNSW cosine similarity vector index on FOOD_BATCHES(embedding).
+    * Domain integrity CHECK constraints (quantities, dates, statuses).
+    * B-tree lookup indexes for high-frequency queries.
+
+- database/mysql_legacy_schema.sql
+  Archived original MySQL DDL dump from Lab 4. Preserved to document the
+  evolution from MySQL to PostgreSQL + pgvector for grading and viva reference.
+
+- database/seed.sql
+  Portable SQL seed dataset mounted into Docker entrypoint (02_seed.sql). Contains
+  production-grade test data including 8 auth users (bcrypt hashed passwords),
+  5 food donators, 17 Indian food catalog items, 4 food banks, 4 transport vehicles,
+  routines, 17 food batches (with genuine 384-dimensional dense vectors), sample
+  claims, deliveries, feedback, waste records, and audit logs.
+
+- database/procedures_triggers_views.sql
+  Milestone 2 advanced database logic mounted into Docker (03_procedures_triggers_views.sql).
+  Contains:
+    * fn_claim_food_batch(): Atomic stored procedure with pessimistic row locking
+      (SELECT ... FOR UPDATE) preventing concurrency race conditions during claims.
+    * fn_process_expired_batches(): Automated daily batch expiration sweeper that
+      transfers expired unsold units into WASTE_AUDIT_RECORDS and logs the event.
+    * trg_log_batch_status_change & trg_log_claim_status_change: Automatic audit
+      trail triggers logging status/stock transitions into LOGS.
+    * trg_prevent_negative_inventory: Data integrity trigger blocking negative stock.
+    * Analytical Views: view_available_batches, view_expiring_soon_batches,
+      view_donor_efficiency (with subqueries), and view_food_bank_utilization.
+
+--------------------------------------------------------------------------------
+3. SCRIPTS & UTILITIES (scripts/)
+--------------------------------------------------------------------------------
+
+- scripts/seed.mjs
+  Automated Node.js seed runner. Connects to PostgreSQL via 'pg', hashes passwords
+  using 'bcryptjs', runs the local '@xenova/transformers' model to generate 384-dim
+  vector embeddings for batches, populates all relational tables, generates
+  database/seed.sql, and performs a live semantic similarity validation test.
+
+- scripts/apply_m2.mjs
+  Execution and automated testing script for Milestone 2. Applies
+  procedures_triggers_views.sql and runs comprehensive test cases for atomic
+  claiming, over-claim prevention, expired batch rejection, audit trigger
+  verification, and analytical view querying.
+
+--------------------------------------------------------------------------------
+4. APPLICATION SOURCE CODE (src/)
+--------------------------------------------------------------------------------
+
+- src/lib/db.ts
+  PostgreSQL database connection pool singleton using the 'pg' library. Manages
+  reusable database connections, logging query performance in development,
+  and executing parameterized SQL queries from Server Actions and Route Handlers.
+
+- src/app/globals.css
+  Global CSS stylesheet containing Tailwind CSS base directives, components,
+  utilities, and root color variables.
+
+- src/app/layout.tsx
+  Next.js root application layout. Sets HTML shell, body metadata, font
+  smoothing, and page styling wrapped around all routes.
+
+- src/app/page.tsx
+  Landing page component displaying the project title, team information,
+  architecture badges, direct role navigation cards, and live auth state.
+
+- src/types/next-auth.d.ts
+  TypeScript type declarations augmenting NextAuth Session and User interfaces
+  with custom role, organization, and referenceId properties.
+
+- src/lib/auth.ts
+  NextAuth authentication options configuration. Configures CredentialsProvider
+  to verify user credentials against the USERS table via bcrypt, injects roles
+  into JWT tokens, and sets up session callbacks.
+
+- src/components/Providers.tsx
+  Client-side NextAuth SessionProvider wrapper allowing components across the
+  entire app to access authentication state.
+
+- src/components/Navbar.tsx
+  Sticky top navigation bar showing application logo, role-specific badge colors,
+  navigation links (Donor Portal, Food Bank Portal, Admin View), and Sign In/Out.
+
+- src/app/login/page.tsx
+  Sign-in page with credential input fields and a 1-click Quick Demo Account
+  switcher for instant evaluation across DONOR, FOOD_BANK, and ADMIN roles.
+
+- src/app/register/page.tsx
+  Registration page allowing new organizations to sign up as either a Food Donor
+  or Food Bank / Shelter.
+
+- src/app/api/auth/[...nextauth]/route.ts
+  Next.js API route handler serving NextAuth authentication endpoints (GET/POST).
+
+- src/app/api/auth/register/route.ts
+  API route handler executing atomic registration transactions across FOOD_DONATORS,
+  FOOD_BANKS, and USERS tables with salted bcrypt password hashing.
+
+- src/app/api/donor/catalog/route.ts
+  API endpoint returning available food catalog items for donor batch selection.
+
+- src/app/api/donor/batches/route.ts
+  API endpoint managing donor inventory. GET returns batches for the logged-in donor;
+  POST calculates 384-dimensional vector embeddings and inserts new batches.
+
+- src/app/donor/page.tsx
+  Food Donor dashboard with inventory KPI cards, expiration countdowns, and a
+  modal form to list fresh surplus food batches.
+
+- src/app/api/food-bank/inventory/route.ts
+  API endpoint returning available batches (view_available_batches) and urgent
+  distress items expiring in <= 48 hours (view_expiring_soon_batches).
+
+- src/app/api/food-bank/claim/route.ts
+  API endpoint calling the atomic stored procedure fn_claim_food_batch() with
+  pessimistic row locking to process claims safely.
+
+- src/app/api/food-bank/claims/route.ts
+  API endpoint returning the historical and active claim requests for a food bank.
+
+- src/app/food-bank/page.tsx
+  Food Bank portal featuring urgent distress banners, searchable inventory grid,
+  one-click claiming modal with real-time stock updates, and a My Claims view.
+
+- src/app/api/admin/stats/route.ts
+  API endpoint returning platform-wide KPIs, view_donor_efficiency,
+  view_food_bank_utilization, and live LOGS entries.
+
+- src/app/api/admin/sweep-expiry/route.ts
+  API endpoint invoking fn_process_expired_batches() to sweep expired batches into
+  WASTE_AUDIT_RECORDS.
+
+- src/app/admin/page.tsx
+  System Admin dashboard displaying donor rescue efficiencies, food bank capacity
+  utilization, live database audit trails, and an interactive expiry sweeper trigger.
+
+--------------------------------------------------------------------------------
+5. MILESTONE 4: AI SEMANTIC SEARCH (src/app/smart-match/, src/app/api/search/)
+--------------------------------------------------------------------------------
+
+- src/app/api/search/route.ts
+  POST API endpoint implementing dual search engine comparison. Accepts a natural-
+  language search query, optional category filter, and max results count. Performs:
+    (1) Semantic vector search: uses @xenova/transformers to generate a 384-dim
+        query embedding via all-MiniLM-L6-v2, then queries PostgreSQL pgvector
+        HNSW index using cosine distance (<=> operator) to rank food batches by
+        semantic similarity. Returns match_percentage scores.
+    (2) Traditional keyword search: tokenizes the query and runs SQL ILIKE pattern
+        matching against food_name and description columns for side-by-side proof
+        that keyword search fails on intent-based queries.
+  Returns both result sets with independent latency measurements for evaluation.
+
+- src/app/smart-match/page.tsx
+  AI Semantic Distress Matching page — the primary Milestone 4 deliverable. Features:
+    * Natural language search input with auto-filled evaluation prompts.
+    * Category filter dropdown (BAKERY, DAIRY, PRODUCE, PREPARED_MEALS, etc.).
+    * 5 quick-demo prompt chips for 1-click evaluation scenarios.
+    * Side-by-side results layout: 8-col semantic AI matches vs 4-col SQL keyword.
+    * Semantic result cards with color-coded match % badges, donor info, location,
+      expiry countdown, and distress urgency indicators (<= 2 days).
+    * Inline claim button for FOOD_BANK/ADMIN roles, with "Sign in" prompt for
+      unauthenticated users.
+    * Claim modal invoking fn_claim_food_batch() stored procedure via the existing
+      /api/food-bank/claim route with atomic pessimistic locking.
+    * Dark-themed "How Semantic Search Works" technical explainer panel showing the
+      3-step pipeline (Encode → HNSW Search → Rank & Filter).
+    * Comparison metrics bar displaying vector vs SQL latency in real time.
+
+--------------------------------------------------------------------------------
+6. MILESTONE 5: CONCURRENCY STRESS-TESTING & DOCUMENTATION (docs/ & scripts/)
+--------------------------------------------------------------------------------
+
+- scripts/concurrency_test.mjs
+  Milestone 5 core concurrency stress-testing suite. Simulates parallel race
+  conditions and bursts against PostgreSQL 16 using pessimistic row locks
+  (SELECT ... FOR UPDATE via fn_claim_food_batch):
+    * Scenario 1: 5 parallel workers contending for 3 items (verifies 3 granted,
+      2 rejected, final stock = 0, zero negative overselling).
+    * Scenario 2: High-contention burst with 10 workers requesting 35 units total
+      against 12 available items (verifies inventory conservation).
+    * Scenario 3: Database-level CHECK constraint & BEFORE UPDATE trigger bypass
+      prevention testing.
+    * Scenario 4: Audit trail fidelity verification in the LOGS table.
+
+- src/app/api/admin/concurrency-test/route.ts
+  Next.js API route executing an on-demand live 5-worker concurrency race condition
+  test and returning real-time worker telemetry, latency, and ACID verification flags.
+
+- src/app/explorer/page.tsx (Updated)
+  Enhanced with the interactive "ACID Stress Test" tab allowing evaluators to run
+  the race condition stress test with 1 click directly inside the web browser.
+
+- docs/ER_DIAGRAM_AND_SCHEMA.md
+  Comprehensive relational schema and Entity-Relationship diagram export. Includes
+  a complete Mermaid ER diagram with cardinality annotations, textual schema
+  formalism, 3NF/BCNF normalization proof, and domain integrity rules.
+
+- docs/DATA_DICTIONARY.md
+  Complete database data dictionary specifying all 12 tables, attributes, data
+  types, constraints, nullability, defaults, domain meanings, and HNSW vector index
+  parameters (m=16, ef_construction=64, cosine distance <=>).
+
+- docs/VECTOR_SEARCH_JUSTIFICATION.md
+  Rigorous theoretical and technical justification for vector similarity search.
+  Covers the vocabulary mismatch problem in food rescue, mathematical formulation
+  of Cosine Distance (<=>), HNSW skip-list graph indexing, and why PostgreSQL +
+  pgvector was chosen over separate vector stores (ACID unity, zero sync lag).
+
+- docs/CONTRIBUTION_LOG.md
+  Equitable 50/50 work distribution breakdown between Aariz D (PES1UG24AM330)
+  and Shridhar G (PES1UG25AM814) across all 6 project milestones.
+
+- docs/RUBRIC_COMPLIANCE.md
+  Comprehensive Level 3 syllabus rubric compliance checklist mapping all project
+  features, procedures, triggers, views, and security mechanisms to evaluation criteria.
+
+================================================================================
+LAST UPDATED: 2026-11-02 (Milestone 5 Completed & Verified)
+================================================================================
+
