@@ -44,7 +44,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm group-hover:bg-emerald-700 transition-colors">
-                <Sparkles className="w-5 h-5" />
+                <HeartHandshake className="w-5 h-5" />
               </div>
               <div>
                 <span className="font-extrabold text-slate-900 tracking-tight text-lg">

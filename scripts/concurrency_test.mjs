@@ -324,7 +324,7 @@ async function runConcurrencyTestSuite() {
     console.log('-'.repeat(78));
 
     const auditRes = await adminClient.query(`
-      SELECT log_id, action, entity_type, entity_reference, old_status, new_status, description, timestamp
+      SELECT log_id, action, entity_type, entity_reference, old_status, new_status, description, action_time
       FROM LOGS
       WHERE entity_type = 'FOOD_BATCHES' AND entity_reference = $1
       ORDER BY log_id ASC;
@@ -346,13 +346,11 @@ async function runConcurrencyTestSuite() {
     // CLEANUP TEST HARNESS
     // -------------------------------------------------------------------------
     console.log('🧹 Cleaning up stress-test artifacts from database...');
-    await adminClient.query(`
-      DELETE FROM CLAIMS WHERE batch_id IN ($1, $2);
-      DELETE FROM WASTE_AUDIT_RECORDS WHERE batch_id IN ($1, $2);
-      DELETE FROM LOGS WHERE entity_reference IN ($1, $2) AND entity_type = 'FOOD_BATCHES';
-      DELETE FROM FOOD_BATCHES WHERE batch_id IN ($1, $2);
-      DELETE FROM FOOD_DONATORS WHERE donator_id = $3;
-    `, [batchId1, batchId2, donorId]);
+    await adminClient.query('DELETE FROM CLAIMS WHERE batch_id IN ($1, $2)', [batchId1, batchId2]);
+    await adminClient.query('DELETE FROM WASTE_AUDIT_RECORDS WHERE batch_id IN ($1, $2)', [batchId1, batchId2]);
+    await adminClient.query("DELETE FROM LOGS WHERE entity_reference IN ($1, $2) AND entity_type = 'FOOD_BATCHES'", [batchId1, batchId2]);
+    await adminClient.query('DELETE FROM FOOD_BATCHES WHERE batch_id IN ($1, $2)', [batchId1, batchId2]);
+    await adminClient.query('DELETE FROM FOOD_DONATORS WHERE donator_id = $1', [donorId]);
     console.log('✓ Test cleanup complete.\n');
 
     // -------------------------------------------------------------------------

@@ -18,7 +18,8 @@ import {
   AlertTriangle,
   Package,
   Layers,
-  ChevronRight
+  ChevronRight,
+  LogIn
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -136,7 +137,7 @@ export default async function Home() {
                     href="/login"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/20 hover:shadow-lg transition-all"
                   >
-                    <Sparkles className="w-4 h-4" />
+                    <LogIn className="w-4 h-4" />
                     Launch Interactive Demo
                   </Link>
                   <Link

@@ -288,8 +288,17 @@ export default function SmartMatchPage() {
             </div>
 
             {semanticResults.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200">
-                No active surplus batches matched your criteria.
+              <div className="p-8 text-center bg-white rounded-2xl border border-dashed border-slate-300">
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                  <Search className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-800">No High-Confidence Semantic Matches Found</h3>
+                <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+                  Our distance filter (<span className="font-mono text-emerald-700 font-semibold">&lt; 0.62 cosine cutoff</span>) safely rejected low-relevance items to prevent delivering mismatched supplies.
+                </p>
+                <div className="mt-3 text-[11px] text-slate-400">
+                  Tip: Try broader nutritional terms like <span className="font-semibold text-slate-600">&ldquo;protein&rdquo;</span>, <span className="font-semibold text-slate-600">&ldquo;breakfast&rdquo;</span>, <span className="font-semibold text-slate-600">&ldquo;cooked dinner&rdquo;</span>, or <span className="font-semibold text-slate-600">&ldquo;staple grains&rdquo;</span>.
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

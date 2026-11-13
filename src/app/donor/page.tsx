@@ -54,6 +54,14 @@ export default function DonorDashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [formMsg, setFormMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
+  // Custom Food Item State (allows adding brand new commodities on the fly)
+  const [isCustomFood, setIsCustomFood] = useState(false);
+  const [customFoodName, setCustomFoodName] = useState('');
+  const [customCategory, setCustomCategory] = useState('PRODUCE');
+  const [customDescription, setCustomDescription] = useState('');
+  const [customUnit, setCustomUnit] = useState('kg');
+  const [customStorage, setCustomStorage] = useState('AMBIENT');
+
   // Redirect unauthorized
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -96,15 +104,33 @@ export default function DonorDashboard() {
     setFormMsg(null);
 
     try {
+      const payload: any = {
+        isNewFood: isCustomFood,
+        quantity: parseInt(quantity, 10),
+        expiryDate,
+        storageCondition,
+      };
+
+      if (isCustomFood) {
+        if (!customFoodName.trim()) {
+          throw new Error('Please enter a name for the new food item');
+        }
+        payload.newFoodName = customFoodName.trim();
+        payload.newCategory = customCategory;
+        payload.newDescription = customDescription.trim();
+        payload.newUnit = customUnit;
+        payload.newStorageRequirement = customStorage;
+      } else {
+        if (!selectedFoodId) {
+          throw new Error('Please select a food item from the catalog');
+        }
+        payload.foodId = selectedFoodId;
+      }
+
       const res = await fetch('/api/donor/batches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          foodId: selectedFoodId,
-          quantity: parseInt(quantity, 10),
-          expiryDate,
-          storageCondition,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -112,7 +138,17 @@ export default function DonorDashboard() {
         throw new Error(data.error || 'Failed to list food batch');
       }
 
-      setFormMsg({ type: 'success', text: 'Batch created & 384-dim AI embedding indexed!' });
+      setFormMsg({
+        type: 'success',
+        text: isCustomFood
+          ? `Added "${customFoodName}" to catalog & indexed batch with 384-dim AI embedding!`
+          : 'Batch created & 384-dim AI embedding indexed!',
+      });
+
+      if (data.newFood) {
+        setCatalog((prev) => [...prev, data.newFood]);
+      }
+
       setTimeout(() => {
         setShowModal(false);
         setFormMsg(null);
@@ -120,8 +156,11 @@ export default function DonorDashboard() {
         setQuantity('');
         setExpiryDate('');
         setStorageCondition('');
+        setIsCustomFood(false);
+        setCustomFoodName('');
+        setCustomDescription('');
         loadData();
-      }, 1000);
+      }, 1200);
     } catch (err: any) {
       setFormMsg({ type: 'error', text: err?.message || 'Failed to list batch' });
     } finally {
@@ -347,25 +386,159 @@ export default function DonorDashboard() {
               </div>
             )}
 
+            {/* Mode Switcher: Existing Catalog Item vs Brand New Food */}
+            <div className="flex rounded-lg bg-slate-100 p-1 mb-4">
+              <button
+                type="button"
+                onClick={() => setIsCustomFood(false)}
+                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  !isCustomFood
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Choose from Catalog ({catalog.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCustomFood(true)}
+                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  isCustomFood
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                + Add New Custom Item
+              </button>
+            </div>
+
             <form onSubmit={handleCreateBatch} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Select Food Catalog Item *
-                </label>
-                <select
-                  required
-                  value={selectedFoodId}
-                  onChange={(e) => setSelectedFoodId(Number(e.target.value))}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
-                >
-                  <option value="">-- Choose Indian food item --</option>
-                  {catalog.map((f) => (
-                    <option key={f.food_id} value={f.food_id}>
-                      [{f.category}] {f.food_name} ({f.unit})
+              {!isCustomFood ? (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Select Food Catalog Item *
+                  </label>
+                  <select
+                    required={!isCustomFood}
+                    value={selectedFoodId}
+                    onChange={(e) => {
+                      if (e.target.value === 'NEW') {
+                        setIsCustomFood(true);
+                      } else {
+                        setSelectedFoodId(Number(e.target.value));
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 bg-white"
+                  >
+                    <option value="">-- Choose Indian food item --</option>
+                    {catalog.map((f) => (
+                      <option key={f.food_id} value={f.food_id}>
+                        [{f.category}] {f.food_name} ({f.unit})
+                      </option>
+                    ))}
+                    <option value="NEW" className="font-bold text-emerald-700">
+                      ➕ Not in list? Click here to add a new food item...
                     </option>
-                  ))}
-                </select>
-              </div>
+                  </select>
+                </div>
+              ) : (
+                <div className="space-y-3 p-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-900 uppercase tracking-wider">
+                      New Master Commodity Details
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsCustomFood(false)}
+                      className="text-[11px] text-emerald-700 hover:underline"
+                    >
+                      Back to catalog list
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Food Item Name *
+                    </label>
+                    <input
+                      type="text"
+                      required={isCustomFood}
+                      value={customFoodName}
+                      onChange={(e) => setCustomFoodName(e.target.value)}
+                      placeholder="e.g. Fresh Organic Apples, Sourdough Loaf"
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 bg-white"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Category *
+                      </label>
+                      <select
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"
+                      >
+                        <option value="PRODUCE">PRODUCE</option>
+                        <option value="BAKERY">BAKERY</option>
+                        <option value="DAIRY">DAIRY</option>
+                        <option value="PREPARED_MEALS">PREPARED_MEALS</option>
+                        <option value="CANNED_GOODS">CANNED_GOODS</option>
+                        <option value="BEVERAGES">BEVERAGES</option>
+                        <option value="PACKAGED_SNACKS">PACKAGED_SNACKS</option>
+                        <option value="OTHER">OTHER</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        Unit *
+                      </label>
+                      <select
+                        value={customUnit}
+                        onChange={(e) => setCustomUnit(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"
+                      >
+                        <option value="kg">kg (Kilograms)</option>
+                        <option value="litres">litres</option>
+                        <option value="packets">packets</option>
+                        <option value="servings">servings</option>
+                        <option value="boxes">boxes</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Nutritional Description (Embeddings Vector Context)
+                    </label>
+                    <input
+                      type="text"
+                      value={customDescription}
+                      onChange={(e) => setCustomDescription(e.target.value)}
+                      placeholder="e.g. Crisp organic red apples rich in fiber and vitamins for shelter meals"
+                      className="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Storage Requirement
+                    </label>
+                    <select
+                      value={customStorage}
+                      onChange={(e) => setCustomStorage(e.target.value)}
+                      className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"
+                    >
+                      <option value="AMBIENT">AMBIENT (Room Temperature)</option>
+                      <option value="REFRIGERATED">REFRIGERATED (Cold Storage 0-4°C)</option>
+                      <option value="FROZEN">FROZEN (-18°C)</option>
+                      <option value="DRY">DRY (Moisture-free Pantry)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

@@ -11,7 +11,7 @@ const { Pool } = pg;
 
 const DATABASE_URL =
   process.env.DATABASE_URL ||
-  'postgresql://postgres:postgres@localhost:5432/food_redistribution';
+  'postgresql://postgres:postgres@127.0.0.1:5432/food_redistribution';
 
 console.log('🌱 Starting Seed Data Generation for Milestone 1...');
 console.log(`Connecting to: ${DATABASE_URL}`);
@@ -192,146 +192,394 @@ async function seed() {
     }
 
     // --------------------------------------------------------------------------
-    // 3. SEED FOOD CATALOG ITEMS (INDIAN-CENTRIC)
+    // 3. SEED FOOD CATALOG ITEMS (70% Indian / 30% Continental)
     // --------------------------------------------------------------------------
-    console.log('🍛 Seeding Indian-Centric Food Catalog...');
+    console.log('🍛 Seeding Food Catalog (48 commodities: 71% Indian, 29% Continental)...');
     const foods = [
       {
-        name: 'Fresh Whole Wheat Phulka / Chapati Packs (10-Pack)',
-        cat: 'BAKERY',
-        desc: 'Soft handmade whole wheat flatbreads, zero preservatives. Ideal for shelter dinner distribution.',
-        unit: 'packets',
-        storage: 'AMBIENT',
-        perishable: true,
+        "name": "Fresh Whole Wheat Phulka / Chapati Packs (10-Pack)",
+        "cat": "BAKERY",
+        "desc": "Soft handmade whole wheat flatbreads, zero preservatives. Ideal for shelter lunch and dinner meals.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
       },
       {
-        name: 'Iyengar Bakery Masala Bread & Veg Puffs',
-        cat: 'BAKERY',
-        desc: 'Traditional Bangalore spiced onion-coriander bread loaves and potato vegetable curry puffs.',
-        unit: 'packets',
-        storage: 'AMBIENT',
-        perishable: true,
+        "name": "Iyengar Bakery Masala Bread & Veg Puffs",
+        "cat": "BAKERY",
+        "desc": "Traditional Bangalore spiced onion-coriander bread loaves and potato vegetable curry puffs.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
       },
       {
-        name: 'Tandoori Roti & Naan Catering Trays',
-        cat: 'BAKERY',
-        desc: 'Clay-oven baked whole wheat rotis and leavened naans from wedding reception banquet overflow.',
-        unit: 'packets',
-        storage: 'AMBIENT',
-        perishable: true,
+        "name": "Tandoori Roti & Naan Catering Trays",
+        "cat": "BAKERY",
+        "desc": "Clay-oven baked whole wheat rotis and leavened naans from wedding reception banquet overflow.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
       },
       {
-        name: 'Fresh Malai Paneer Blocks (1kg)',
-        cat: 'DAIRY',
-        desc: 'Vacuum-sealed fresh cottage cheese blocks packed with vegetarian milk protein and calcium.',
-        unit: 'kg',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Malabar Parotta Multi-Packs",
+        "cat": "BAKERY",
+        "desc": "Flaky layered Kerala parotta flatbreads, high-calorie meal staple for relief feeding.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
       },
       {
-        name: 'Nandini Pasteurized Toned Milk Pouches',
-        cat: 'DAIRY',
-        desc: 'Fresh pasteurized cow milk sachets (1 Litre each) from Karnataka Milk Federation. Cold chain required.',
-        unit: 'litres',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Soft Bakery Pav Buns (12-Pack)",
+        "cat": "BAKERY",
+        "desc": "Freshly baked fluffy dinner pav buns for community vegetable curry and soup distribution.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
       },
       {
-        name: 'Fresh Set Dahi / Curd Tubs (500g)',
-        cat: 'DAIRY',
-        desc: 'Probiotic-rich thick pasteurized fermented yogurt tubs. Essential for midday meals.',
-        unit: 'packets',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Fresh Malai Paneer Blocks (1kg)",
+        "cat": "DAIRY",
+        "desc": "Vacuum-sealed fresh cottage cheese blocks packed with vegetarian milk protein and calcium.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'Organic Palak (Spinach) & Methi Greens',
-        cat: 'PRODUCE',
-        desc: 'Freshly harvested leafy greens rich in iron, vitamin A, and dietary fiber from peri-urban farms.',
-        unit: 'kg',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Nandini Pasteurized Toned Milk Pouches",
+        "cat": "DAIRY",
+        "desc": "Fresh pasteurized cow milk sachets (1 Litre each) from Karnataka Milk Federation. Cold chain required.",
+        "unit": "litres",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'Country Tomatoes & Red Onions (Bulk Sacks)',
-        cat: 'PRODUCE',
-        desc: 'Essential cooking produce in 20kg crates from local APMC mandi. Firm and ripe.',
-        unit: 'kg',
-        storage: 'AMBIENT',
-        perishable: true,
+        "name": "Fresh Set Dahi / Curd Tubs (500g)",
+        "cat": "DAIRY",
+        "desc": "Probiotic-rich thick pasteurized fermented yogurt tubs. Essential for cooling midday meals.",
+        "unit": "packets",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'Fresh Ginger-Garlic Cooking Paste Tubs',
-        cat: 'PRODUCE',
-        desc: 'Pure ground ginger and garlic aromatics for high-volume community soup kitchen preparations.',
-        unit: 'kg',
-        storage: 'REFRIGERATED',
-        perishable: false,
+        "name": "Amul Salted Dairy Butter Bricks (500g)",
+        "cat": "DAIRY",
+        "desc": "Pure pasteurized cow milk table butter blocks. Essential fats and energy for community kitchens.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'Hyderabadi Vegetable Dum Biryani Trays',
-        cat: 'PREPARED_MEALS',
-        desc: 'Aromatic long-grain basmati rice cooked with seasonal vegetables, mint, and saffron spices.',
-        unit: 'servings',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Spiced Masala Buttermilk / Chaas Pouches (200ml)",
+        "cat": "DAIRY",
+        "desc": "Cooling probiotic spiced buttermilk with ginger and curry leaves for summer hydration relief.",
+        "unit": "packets",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'Homestyle Tadka Dal & Jeera Rice',
-        cat: 'PREPARED_MEALS',
-        desc: 'Nutritious yellow moong-toor lentil stew tempered with cumin, ghee, and steamed basmati rice.',
-        unit: 'servings',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Fresh Khoya / Mawa Solid Milk Blocks",
+        "cat": "DAIRY",
+        "desc": "Evaporated dense milk solids for high-calorie festive nutrition and children dessert enrichment.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'South Indian Sambar & Steamed Idlis',
-        cat: 'PREPARED_MEALS',
-        desc: 'Steamed fluffy fermented rice-lentil idlis served with hot drumstick and vegetable tamarind stew.',
-        unit: 'servings',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Organic Palak (Spinach) & Methi Greens",
+        "cat": "PRODUCE",
+        "desc": "Freshly harvested leafy greens rich in iron, vitamin A, and dietary fiber from peri-urban farms.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'Paneer Butter Masala Catering Trays',
-        cat: 'PREPARED_MEALS',
-        desc: 'Rich cashew-tomato gravy with soft paneer cubes prepared for banquet dinner event.',
-        unit: 'servings',
-        storage: 'REFRIGERATED',
-        perishable: true,
+        "name": "Country Tomatoes & Red Onions (Bulk Sacks)",
+        "cat": "PRODUCE",
+        "desc": "Essential cooking produce in 20kg crates from local APMC mandi. Firm and ripe staple vegetables.",
+        "unit": "kg",
+        "storage": "AMBIENT",
+        "perishable": true
       },
       {
-        name: 'Sona Masoori Raw Rice (25kg Sacks)',
-        cat: 'CANNED_GOODS',
-        desc: 'Premium Karnataka medium-grain polished white rice. High yield and long shelf-life staple for hunger relief.',
-        unit: 'packets',
-        storage: 'AMBIENT',
-        perishable: false,
+        "name": "Fresh Ginger-Garlic Cooking Paste Tubs",
+        "cat": "PRODUCE",
+        "desc": "Pure ground ginger and garlic aromatics for high-volume community soup kitchen preparations.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": false
       },
       {
-        name: 'Unpolished Toor Dal & Chana Dal (10kg Bags)',
-        cat: 'CANNED_GOODS',
-        desc: 'High-protein staple yellow lentils and split chickpeas for high-volume shelter nutrition.',
-        unit: 'packets',
-        storage: 'AMBIENT',
-        perishable: false,
+        "name": "Farm Fresh Green Peas & Cauliflower Florets",
+        "cat": "PRODUCE",
+        "desc": "Tender sweet green peas and crisp cauliflower rich in vitamin C and plant protein.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
       },
       {
-        name: 'Roasted Peanut & Jaggery Chikki Bars',
-        cat: 'PACKAGED_SNACKS',
-        desc: 'Traditional high-energy roasted groundnut and unrefined jaggery brittle bars. Compact emergency nutrition.',
-        unit: 'packets',
-        storage: 'AMBIENT',
-        perishable: false,
+        "name": "Green Bell Peppers & Carrots Crates",
+        "cat": "PRODUCE",
+        "desc": "Crunchy farm carrots and sweet capsicum peppers for mixed vegetable curries and salads.",
+        "unit": "kg",
+        "storage": "AMBIENT",
+        "perishable": true
       },
       {
-        name: 'Millet Ragi Sweet Biscuit Packs',
-        cat: 'PACKAGED_SNACKS',
-        desc: 'Finger millet baked biscuits with natural jaggery. Rich in calcium and iron for youth shelters.',
-        unit: 'packets',
-        storage: 'AMBIENT',
-        perishable: false,
+        "name": "Ripe Bananas & Seasonal Papaya Crates",
+        "cat": "PRODUCE",
+        "desc": "Natural sweet potassium-rich fruits for children morning nutrition and shelter breakfast.",
+        "unit": "kg",
+        "storage": "AMBIENT",
+        "perishable": true
       },
+      {
+        "name": "Hyderabadi Vegetable Dum Biryani Trays",
+        "cat": "PREPARED_MEALS",
+        "desc": "Aromatic long-grain basmati rice cooked with seasonal vegetables, mint, and saffron spices.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Homestyle Tadka Dal & Jeera Rice",
+        "cat": "PREPARED_MEALS",
+        "desc": "Nutritious yellow moong-toor lentil stew tempered with cumin, ghee, and steamed basmati rice.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "South Indian Sambar & Steamed Idlis",
+        "cat": "PREPARED_MEALS",
+        "desc": "Steamed fluffy fermented rice-lentil idlis served with hot drumstick and vegetable tamarind stew.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Paneer Butter Masala Catering Trays",
+        "cat": "PREPARED_MEALS",
+        "desc": "Rich cashew-tomato gravy with soft paneer cottage cheese cubes prepared for banquet dinner event.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Punjabi Rajma Masala & Steamed Basmati Rice",
+        "cat": "PREPARED_MEALS",
+        "desc": "Slow-cooked red kidney beans in thick spiced onion-tomato gravy with fragrant basmati rice.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Chole Masala & Poori Banquet Packs",
+        "cat": "PREPARED_MEALS",
+        "desc": "Spiced chickpea curry packed with iron and protein, served with whole wheat puffed pooris.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Vegetable Pulao & Cucumber Boondi Raita",
+        "cat": "PREPARED_MEALS",
+        "desc": "Mildly spiced garden vegetable rice pilaf accompanied by cooling seasoned yogurt raita.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Moong Dal Khichdi Nutritious Healing Meal",
+        "cat": "PREPARED_MEALS",
+        "desc": "Comforting yellow split lentil and rice porridge cooked with cumin, ginger, and turmeric.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Fermented Idli & Dosa Wet Batter Tubs (1kg)",
+        "cat": "PREPARED_MEALS",
+        "desc": "Ready-to-cook fermented stone-ground rice and urad dal batter for breakfast feeding programs.",
+        "unit": "packets",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Sona Masoori Raw Rice (25kg Sacks)",
+        "cat": "CANNED_GOODS",
+        "desc": "Premium Karnataka medium-grain polished white rice. High yield and long shelf-life staple for hunger relief.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Unpolished Toor Dal & Chana Dal (10kg Bags)",
+        "cat": "CANNED_GOODS",
+        "desc": "High-protein staple yellow lentils and split chickpeas for high-volume shelter nutrition.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Whole Wheat Sharbati Atta Flour (10kg Sacks)",
+        "cat": "CANNED_GOODS",
+        "desc": "Stone-ground 100% whole grain wheat flour for community roti and chapati baking.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Dried Kabuli Chana Chickpeas & Raw Rajma (5kg)",
+        "cat": "CANNED_GOODS",
+        "desc": "Bulk raw garbanzo beans and red kidney beans. Shelf-stable vegetarian plant protein.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Thick Poha Flattened Rice Flakes (5kg Sacks)",
+        "cat": "CANNED_GOODS",
+        "desc": "Iron-rich dry parboiled flattened rice for instant high-volume breakfast porridge cooking.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Roasted Peanut & Jaggery Chikki Bars",
+        "cat": "PACKAGED_SNACKS",
+        "desc": "Traditional high-energy roasted groundnut and unrefined jaggery brittle bars. Compact emergency nutrition.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Millet Ragi Sweet Biscuit Packs",
+        "cat": "PACKAGED_SNACKS",
+        "desc": "Finger millet baked biscuits with natural jaggery. Rich in calcium and iron for youth shelters.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Spiced Roasted Makhana / Foxnuts Packs",
+        "cat": "PACKAGED_SNACKS",
+        "desc": "Light puffed lotus seeds roasted with turmeric and sea salt. Low-sodium, high-fiber healthy snack.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Artisan Sourdough Country Bread Loaves",
+        "cat": "BAKERY",
+        "desc": "Naturally fermented whole wheat sourdough bread with crusty crumb and gut-healthy prebiotic enzymes.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
+      },
+      {
+        "name": "Whole Grain Multigrain Sandwich Bread",
+        "cat": "BAKERY",
+        "desc": "Pre-sliced fiber-rich sandwich loaves baked with flaxseeds, oats, sunflower seeds, and whole wheat.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
+      },
+      {
+        "name": "Fresh Baked Butter Croissants (6-Pack)",
+        "cat": "BAKERY",
+        "desc": "Flaky French golden crescent pastries laminated with real churned butter for morning shelter meals.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
+      },
+      {
+        "name": "French Crusty Baguettes & Dinner Rolls",
+        "cat": "BAKERY",
+        "desc": "Traditional artisan European crusty bread sticks and dinner brioche rolls from hotel banquet.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": true
+      },
+      {
+        "name": "Natural Cheddar Cheese Blocks (1kg)",
+        "cat": "DAIRY",
+        "desc": "Aged pasteurized yellow cheddar cheese blocks rich in concentrated dairy protein, fat, and calcium.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Unsweetened Greek Style Plain Yogurt Tubs",
+        "cat": "DAIRY",
+        "desc": "Strained high-protein thick European yogurt packed with live probiotics and zero added sugar.",
+        "unit": "packets",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Fresh Crisp Gala Apples & Valencia Oranges (Crates)",
+        "cat": "PRODUCE",
+        "desc": "Grade-A fresh orchard fruits rich in vitamin C, flavonoids, and dietary fiber for child nutrition.",
+        "unit": "kg",
+        "storage": "AMBIENT",
+        "perishable": true
+      },
+      {
+        "name": "Iceberg Lettuce & Fresh Baby Salad Greens",
+        "cat": "PRODUCE",
+        "desc": "Hydroponic crisp lettuce, arugula, and baby spinach washed and packed for cold distribution.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Button Mushrooms & Zucchini Crates",
+        "cat": "PRODUCE",
+        "desc": "Fresh white button mushrooms and green courgettes rich in minerals and antioxidants.",
+        "unit": "kg",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Baked Penne Pasta in Basil Marinara Sauce",
+        "cat": "PREPARED_MEALS",
+        "desc": "Durum wheat penne rigate pasta tossed with crushed Italian plum tomatoes, garlic, oregano, and olive oil.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Creamy Herb & Mushroom Risotto Trays",
+        "cat": "PREPARED_MEALS",
+        "desc": "Arborio short-grain rice gently simmered in vegetable stock with sauteed wild mushrooms and parmesan.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Hearty Minestrone Vegetable & Bean Soup",
+        "cat": "PREPARED_MEALS",
+        "desc": "Warm comforting rustic vegetable broth with cannellini white beans, diced carrots, zucchini, and macaroni.",
+        "unit": "servings",
+        "storage": "REFRIGERATED",
+        "perishable": true
+      },
+      {
+        "name": "Canned Peeled Italian Plum Tomatoes & Puree",
+        "cat": "CANNED_GOODS",
+        "desc": "Whole peeled plum tomatoes in thick rich culinary sauce. Shelf-stable base for soup kitchens.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      },
+      {
+        "name": "Rolled Porridge Oats & Whole Grain Muesli (5kg)",
+        "cat": "CANNED_GOODS",
+        "desc": "High-fiber whole grain rolled breakfast oats and toasted seed muesli for nutritious morning shelter porridge.",
+        "unit": "packets",
+        "storage": "AMBIENT",
+        "perishable": false
+      }
     ];
 
     for (const f of foods) {
@@ -495,7 +743,8 @@ async function seed() {
     // 7. SEED FOOD BATCHES WITH REAL AI VECTOR EMBEDDINGS
     // --------------------------------------------------------------------------
     console.log('🧠 Generating AI Vector Embeddings via @xenova/transformers...');
-    const { pipeline } = await import('@xenova/transformers');
+    const { pipeline, env } = await import('@xenova/transformers');
+    env.allowRemoteModels = false;
     const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
 
     // Date helper offsets from today
@@ -506,223 +755,508 @@ async function seed() {
       return date.toISOString().split('T')[0];
     };
 
-    const batches = [
-      // Expired batches (for testing waste audits and triggers)
+    const batchDefinitions = [
       {
-        foodId: 2,
-        donorId: 2,
-        qty: 30,
-        avail: 0,
-        donDate: addDays(-6),
-        mfgDate: addDays(-7),
-        expDate: addDays(-2),
-        cond: 'Ambient room temp bakery shelf',
-        status: 'EXPIRED',
-        semanticDesc: 'Iyengar bakery masala bread loaves and potato puffs spiced savory snacks',
+        "foodId": 2,
+        "donorId": 2,
+        "qty": 30,
+        "avail": 0,
+        "donOffset": -6,
+        "mfgOffset": -7,
+        "expOffset": -2,
+        "cond": "Ambient room temp bakery shelf",
+        "status": "EXPIRED",
+        "semanticDesc": "Iyengar bakery masala bread loaves and potato puffs spiced savory snacks"
       },
       {
-        foodId: 5,
-        donorId: 1,
-        qty: 50,
-        avail: 0,
-        donDate: addDays(-5),
-        mfgDate: addDays(-6),
-        expDate: addDays(-1),
-        cond: 'Refrigerated cold room 4C',
-        status: 'EXPIRED',
-        semanticDesc: 'Nandini pasteurized toned milk pouches Karnataka dairy cow milk packets',
-      },
-
-      // Expiring very soon <= 48 hours (Urgent Distress Food!)
-      {
-        foodId: 1,
-        donorId: 2,
-        qty: 80,
-        avail: 80,
-        donDate: addDays(-1),
-        mfgDate: addDays(-1),
-        expDate: addDays(1),
-        cond: 'Cool dry pantry',
-        status: 'AVAILABLE',
-        semanticDesc: 'Freshly made handmade whole wheat phulka chapati flatbread rotis for lunch and dinner',
+        "foodId": 7,
+        "donorId": 1,
+        "qty": 50,
+        "avail": 0,
+        "donOffset": -5,
+        "mfgOffset": -6,
+        "expOffset": -1,
+        "cond": "Refrigerated cold room 4C",
+        "status": "EXPIRED",
+        "semanticDesc": "Nandini pasteurized toned milk pouches Karnataka dairy cow milk packets"
       },
       {
-        foodId: 10,
-        donorId: 3,
-        qty: 100,
-        avail: 100,
-        donDate: addDays(0),
-        mfgDate: addDays(0),
-        expDate: addDays(1),
-        cond: 'Chilled insulated food trays 3C',
-        status: 'AVAILABLE',
-        semanticDesc: 'Hot cooked aromatic vegetable dum biryani with long grain basmati rice and spices',
+        "foodId": 1,
+        "donorId": 2,
+        "qty": 80,
+        "avail": 80,
+        "donOffset": -1,
+        "mfgOffset": -1,
+        "expOffset": 1,
+        "cond": "Cool dry pantry",
+        "status": "AVAILABLE",
+        "semanticDesc": "Freshly made handmade whole wheat phulka chapati flatbread rotis for lunch and dinner"
       },
       {
-        foodId: 12,
-        donorId: 4,
-        qty: 60,
-        avail: 60,
-        donDate: addDays(0),
-        mfgDate: addDays(0),
-        expDate: addDays(1),
-        cond: 'Thermal insulated catering containers',
-        status: 'AVAILABLE',
-        semanticDesc: 'Steamed soft rice idlis with hot vegetable sambar drumsticks and lentils for breakfast',
+        "foodId": 18,
+        "donorId": 3,
+        "qty": 100,
+        "avail": 100,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 1,
+        "cond": "Chilled insulated food trays 3C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Hot cooked aromatic vegetable dum biryani with long grain basmati rice, mint, and spices dinner meal"
       },
       {
-        foodId: 4,
-        donorId: 1,
-        qty: 40,
-        avail: 40,
-        donDate: addDays(-1),
-        mfgDate: addDays(-2),
-        expDate: addDays(2),
-        cond: 'Refrigerated dairy chiller 3C',
-        status: 'AVAILABLE',
-        semanticDesc: 'Fresh malai paneer cottage cheese blocks rich vegetarian protein and calcium',
+        "foodId": 20,
+        "donorId": 4,
+        "qty": 60,
+        "avail": 60,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 1,
+        "cond": "Thermal insulated catering containers",
+        "status": "AVAILABLE",
+        "semanticDesc": "Steamed soft rice idlis with hot vegetable sambar drumsticks and lentils for breakfast nourishment"
       },
       {
-        foodId: 11,
-        donorId: 4,
-        qty: 50,
-        avail: 50,
-        donDate: addDays(0),
-        mfgDate: addDays(0),
-        expDate: addDays(2),
-        cond: 'Chilled catering containers',
-        status: 'AVAILABLE',
-        semanticDesc: 'Nutritious yellow toor moong dal with cumin jeera rice comfort warm dinner meal',
+        "foodId": 37,
+        "donorId": 2,
+        "qty": 40,
+        "avail": 40,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 1,
+        "cond": "Ambient bakery trays",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh baked French butter croissants golden flaky pastries breakfast bakery food"
       },
       {
-        foodId: 7,
-        donorId: 5,
-        qty: 45,
-        avail: 45,
-        donDate: addDays(-1),
-        mfgDate: addDays(-1),
-        expDate: addDays(2),
-        cond: 'Misted produce cooler 5C',
-        status: 'AVAILABLE',
-        semanticDesc: 'Fresh organic palak spinach and methi fenugreek green leaves rich in iron and vitamins',
+        "foodId": 44,
+        "donorId": 3,
+        "qty": 70,
+        "avail": 70,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 1,
+        "cond": "Chilled catering containers 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Baked Italian penne pasta in marinara herb basil tomato sauce hot dinner dinner meal"
       },
       {
-        foodId: 13,
-        donorId: 3,
-        qty: 50,
-        avail: 50,
-        donDate: addDays(0),
-        mfgDate: addDays(0),
-        expDate: addDays(2),
-        cond: 'Chilled insulated food containers 3C',
-        status: 'AVAILABLE',
-        semanticDesc: 'Rich creamy paneer butter masala cottage cheese curry gravy for shelter meals',
-      },
-
-      // Fresh Batches (4 to 180 days remaining)
-      {
-        foodId: 3,
-        donorId: 3,
-        qty: 70,
-        avail: 70,
-        donDate: addDays(0),
-        mfgDate: addDays(0),
-        expDate: addDays(4),
-        cond: 'Ambient ventilated bins',
-        status: 'AVAILABLE',
-        semanticDesc: 'Tandoori naan and clay oven baked whole wheat rotis',
+        "foodId": 6,
+        "donorId": 1,
+        "qty": 40,
+        "avail": 40,
+        "donOffset": -1,
+        "mfgOffset": -2,
+        "expOffset": 2,
+        "cond": "Refrigerated dairy chiller 3C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh malai paneer cottage cheese blocks rich vegetarian protein and calcium"
       },
       {
-        foodId: 6,
-        donorId: 1,
-        qty: 60,
-        avail: 60,
-        donDate: addDays(-1),
-        mfgDate: addDays(-2),
-        expDate: addDays(7),
-        cond: 'Chilled dairy display 4C',
-        status: 'AVAILABLE',
-        semanticDesc: 'Fresh probiotic curd dahi yogurt tubs cooling midday meal dairy',
+        "foodId": 19,
+        "donorId": 4,
+        "qty": 50,
+        "avail": 50,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 2,
+        "cond": "Chilled catering containers",
+        "status": "AVAILABLE",
+        "semanticDesc": "Nutritious yellow toor moong dal with cumin jeera rice comfort warm dinner meal"
       },
       {
-        foodId: 8,
-        donorId: 5,
-        qty: 150,
-        avail: 150,
-        donDate: addDays(-1),
-        mfgDate: addDays(-2),
-        expDate: addDays(10),
-        cond: 'Well ventilated crates',
-        status: 'AVAILABLE',
-        semanticDesc: 'Fresh country tomatoes and red onions cooking vegetables staple produce',
+        "foodId": 12,
+        "donorId": 5,
+        "qty": 45,
+        "avail": 45,
+        "donOffset": -1,
+        "mfgOffset": -1,
+        "expOffset": 2,
+        "cond": "Misted produce cooler 5C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh organic palak spinach and methi fenugreek green leaves rich in iron and vitamins"
       },
       {
-        foodId: 9,
-        donorId: 5,
-        qty: 30,
-        avail: 30,
-        donDate: addDays(-2),
-        mfgDate: addDays(-5),
-        expDate: addDays(30),
-        cond: 'Refrigerated pantry 4C',
-        status: 'AVAILABLE',
-        semanticDesc: 'Fresh ginger garlic cooking paste aromatics for high volume community meals',
+        "foodId": 21,
+        "donorId": 3,
+        "qty": 50,
+        "avail": 50,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 2,
+        "cond": "Chilled insulated food containers 3C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Rich creamy paneer butter masala cottage cheese curry gravy for shelter meals"
       },
       {
-        foodId: 14,
-        donorId: 1,
-        qty: 25,
-        avail: 25,
-        donDate: addDays(-3),
-        mfgDate: addDays(-30),
-        expDate: addDays(180),
-        cond: 'Dry pallet storage',
-        status: 'AVAILABLE',
-        semanticDesc: 'Sona Masoori polished raw white rice bulk grain dry ration for hunger relief',
+        "foodId": 46,
+        "donorId": 3,
+        "qty": 60,
+        "avail": 60,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 2,
+        "cond": "Heated insulated soup kettles",
+        "status": "AVAILABLE",
+        "semanticDesc": "Hearty warm minestrone soup vegetable and cannellini bean broth nutritious comfort dinner"
       },
       {
-        foodId: 15,
-        donorId: 1,
-        qty: 30,
-        avail: 30,
-        donDate: addDays(-3),
-        mfgDate: addDays(-30),
-        expDate: addDays(180),
-        cond: 'Dry moisture-free pantry',
-        status: 'AVAILABLE',
-        semanticDesc: 'Unpolished toor dal and split chana dal dry yellow lentils protein rich grains',
+        "foodId": 3,
+        "donorId": 3,
+        "qty": 70,
+        "avail": 70,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 3,
+        "cond": "Ambient ventilated bins",
+        "status": "AVAILABLE",
+        "semanticDesc": "Tandoori naan and clay oven baked whole wheat rotis banquet overflow bread"
       },
       {
-        foodId: 16,
-        donorId: 1,
-        qty: 120,
-        avail: 120,
-        donDate: addDays(0),
-        mfgDate: addDays(-10),
-        expDate: addDays(60),
-        cond: 'Dry ambient display',
-        status: 'AVAILABLE',
-        semanticDesc: 'Peanut and jaggery chikki brittle bars high energy healthy traditional sweet snack',
+        "foodId": 35,
+        "donorId": 2,
+        "qty": 35,
+        "avail": 35,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 3,
+        "cond": "Ambient bread display",
+        "status": "AVAILABLE",
+        "semanticDesc": "Artisan sourdough country bread loaf crusty prebiotic digestive healthy bread"
       },
       {
-        foodId: 17,
-        donorId: 2,
-        qty: 100,
-        avail: 100,
-        donDate: addDays(0),
-        mfgDate: addDays(-5),
-        expDate: addDays(45),
-        cond: 'Dry ambient bakery shelf',
-        status: 'AVAILABLE',
-        semanticDesc: 'Millet ragi biscuits finger millet iron calcium snacks for youth and children',
+        "foodId": 36,
+        "donorId": 2,
+        "qty": 50,
+        "avail": 50,
+        "donOffset": 0,
+        "mfgOffset": -1,
+        "expOffset": 4,
+        "cond": "Ambient dry racks",
+        "status": "AVAILABLE",
+        "semanticDesc": "Whole grain multigrain sliced sandwich bread flaxseed oat fiber loaves"
       },
+      {
+        "foodId": 5,
+        "donorId": 2,
+        "qty": 60,
+        "avail": 60,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 3,
+        "cond": "Bakery display crates",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh fluffy bakery pav buns dinner rolls for community curry and vegetable soup"
+      },
+      {
+        "foodId": 4,
+        "donorId": 2,
+        "qty": 40,
+        "avail": 40,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 4,
+        "cond": "Cool dry shelf",
+        "status": "AVAILABLE",
+        "semanticDesc": "Malabar parotta layered Kerala flatbread high-calorie filling meal for relief"
+      },
+      {
+        "foodId": 26,
+        "donorId": 1,
+        "qty": 40,
+        "avail": 40,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 4,
+        "cond": "Chilled dairy display 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh fermented idli and dosa wet batter stone-ground rice urad dal breakfast preparation"
+      },
+      {
+        "foodId": 8,
+        "donorId": 1,
+        "qty": 60,
+        "avail": 60,
+        "donOffset": -1,
+        "mfgOffset": -2,
+        "expOffset": 6,
+        "cond": "Chilled dairy display 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh probiotic curd dahi yogurt tubs cooling midday meal dairy digestion"
+      },
+      {
+        "foodId": 40,
+        "donorId": 1,
+        "qty": 45,
+        "avail": 45,
+        "donOffset": 0,
+        "mfgOffset": -1,
+        "expOffset": 7,
+        "cond": "Refrigerated dairy display 3C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Unsweetened Greek yogurt high protein thick strained dairy live probiotics breakfast"
+      },
+      {
+        "foodId": 10,
+        "donorId": 1,
+        "qty": 100,
+        "avail": 100,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 5,
+        "cond": "Refrigerated crates 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Spiced masala buttermilk chaas cooling beverage ginger curry leaves hydration"
+      },
+      {
+        "foodId": 42,
+        "donorId": 5,
+        "qty": 30,
+        "avail": 30,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 4,
+        "cond": "Cold misted display 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Hydroponic crisp iceberg lettuce baby salad greens arugula vitamin healthy salad"
+      },
+      {
+        "foodId": 15,
+        "donorId": 5,
+        "qty": 60,
+        "avail": 60,
+        "donOffset": -1,
+        "mfgOffset": -1,
+        "expOffset": 5,
+        "cond": "Vegetable bins 6C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh sweet green peas and cauliflower florets vegetable stew ingredients produce"
+      },
+      {
+        "foodId": 43,
+        "donorId": 5,
+        "qty": 35,
+        "avail": 35,
+        "donOffset": 0,
+        "mfgOffset": 0,
+        "expOffset": 4,
+        "cond": "Chilled crates 5C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh white button mushrooms and green zucchini courgettes minerals plant nutrients"
+      },
+      {
+        "foodId": 17,
+        "donorId": 5,
+        "qty": 80,
+        "avail": 80,
+        "donOffset": 0,
+        "mfgOffset": -1,
+        "expOffset": 4,
+        "cond": "Ambient ventilated crates",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh ripe bananas and seasonal sweet papaya fruit natural energy for children breakfast"
+      },
+      {
+        "foodId": 41,
+        "donorId": 1,
+        "qty": 75,
+        "avail": 75,
+        "donOffset": -1,
+        "mfgOffset": -2,
+        "expOffset": 8,
+        "cond": "Ambient produce crates",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh crisp Gala apples and Valencia oranges orchard citrus fruits vitamin C fiber"
+      },
+      {
+        "foodId": 13,
+        "donorId": 5,
+        "qty": 150,
+        "avail": 150,
+        "donOffset": -1,
+        "mfgOffset": -2,
+        "expOffset": 10,
+        "cond": "Well ventilated crates",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh country tomatoes and red onions cooking vegetables staple produce APMC"
+      },
+      {
+        "foodId": 14,
+        "donorId": 5,
+        "qty": 30,
+        "avail": 30,
+        "donOffset": -2,
+        "mfgOffset": -5,
+        "expOffset": 30,
+        "cond": "Refrigerated pantry 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Fresh ginger garlic cooking paste aromatics for high volume community meals"
+      },
+      {
+        "foodId": 9,
+        "donorId": 1,
+        "qty": 50,
+        "avail": 50,
+        "donOffset": -3,
+        "mfgOffset": -10,
+        "expOffset": 45,
+        "cond": "Chilled dairy pantry 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Pure pasteurized cow milk table butter blocks energy and calories cooking dairy"
+      },
+      {
+        "foodId": 39,
+        "donorId": 1,
+        "qty": 40,
+        "avail": 40,
+        "donOffset": -2,
+        "mfgOffset": -15,
+        "expOffset": 60,
+        "cond": "Refrigerated cheese storage 4C",
+        "status": "AVAILABLE",
+        "semanticDesc": "Natural aged yellow cheddar cheese blocks concentrated dairy protein calcium fat"
+      },
+      {
+        "foodId": 27,
+        "donorId": 1,
+        "qty": 25,
+        "avail": 25,
+        "donOffset": -3,
+        "mfgOffset": -30,
+        "expOffset": 180,
+        "cond": "Dry pallet storage",
+        "status": "AVAILABLE",
+        "semanticDesc": "Sona Masoori polished raw white rice bulk grain dry ration for hunger relief staple"
+      },
+      {
+        "foodId": 28,
+        "donorId": 1,
+        "qty": 30,
+        "avail": 30,
+        "donOffset": -3,
+        "mfgOffset": -30,
+        "expOffset": 180,
+        "cond": "Dry moisture-free pantry",
+        "status": "AVAILABLE",
+        "semanticDesc": "Unpolished toor dal and split chana dal dry yellow lentils protein rich grains soup kitchen"
+      },
+      {
+        "foodId": 29,
+        "donorId": 1,
+        "qty": 40,
+        "avail": 40,
+        "donOffset": -2,
+        "mfgOffset": -20,
+        "expOffset": 120,
+        "cond": "Dry ambient storage",
+        "status": "AVAILABLE",
+        "semanticDesc": "Whole grain wheat atta flour stone ground for making chapatis rotis bread rations"
+      },
+      {
+        "foodId": 30,
+        "donorId": 1,
+        "qty": 50,
+        "avail": 50,
+        "donOffset": -5,
+        "mfgOffset": -30,
+        "expOffset": 180,
+        "cond": "Dry pantry pallets",
+        "status": "AVAILABLE",
+        "semanticDesc": "Dried kabuli chana white chickpeas and raw red rajma kidney beans shelf-stable plant protein"
+      },
+      {
+        "foodId": 47,
+        "donorId": 1,
+        "qty": 80,
+        "avail": 80,
+        "donOffset": -4,
+        "mfgOffset": -30,
+        "expOffset": 150,
+        "cond": "Ambient dry pantry shelf",
+        "status": "AVAILABLE",
+        "semanticDesc": "Canned Italian peeled plum tomatoes and rich tomato puree non-perishable soup kitchen cooking"
+      },
+      {
+        "foodId": 48,
+        "donorId": 1,
+        "qty": 60,
+        "avail": 60,
+        "donOffset": -2,
+        "mfgOffset": -15,
+        "expOffset": 120,
+        "cond": "Dry pantry storage",
+        "status": "AVAILABLE",
+        "semanticDesc": "Rolled breakfast oats and whole grain porridge high fiber healthy breakfast emergency rations"
+      },
+      {
+        "foodId": 31,
+        "donorId": 1,
+        "qty": 40,
+        "avail": 40,
+        "donOffset": -2,
+        "mfgOffset": -10,
+        "expOffset": 90,
+        "cond": "Dry pantry storage",
+        "status": "AVAILABLE",
+        "semanticDesc": "Poha flattened parboiled rice flakes iron rich easy to cook quick shelter breakfast"
+      },
+      {
+        "foodId": 32,
+        "donorId": 1,
+        "qty": 120,
+        "avail": 120,
+        "donOffset": 0,
+        "mfgOffset": -10,
+        "expOffset": 60,
+        "cond": "Dry ambient display",
+        "status": "AVAILABLE",
+        "semanticDesc": "Peanut and jaggery chikki brittle bars high energy healthy traditional sweet snack emergency"
+      },
+      {
+        "foodId": 33,
+        "donorId": 2,
+        "qty": 100,
+        "avail": 100,
+        "donOffset": 0,
+        "mfgOffset": -5,
+        "expOffset": 45,
+        "cond": "Dry ambient bakery shelf",
+        "status": "AVAILABLE",
+        "semanticDesc": "Millet ragi biscuits finger millet iron calcium snacks for youth and children shelter"
+      },
+      {
+        "foodId": 34,
+        "donorId": 1,
+        "qty": 80,
+        "avail": 80,
+        "donOffset": -1,
+        "mfgOffset": -5,
+        "expOffset": 60,
+        "cond": "Dry ambient snack rack",
+        "status": "AVAILABLE",
+        "semanticDesc": "Roasted spiced makhana foxnuts puffed lotus seeds low sodium light healthy snack"
+      }
     ];
+
+    const batches = batchDefinitions.map((b) => ({
+      foodId: b.foodId,
+      donorId: b.donorId,
+      qty: b.qty,
+      avail: b.avail,
+      donDate: addDays(b.donOffset),
+      mfgDate: addDays(b.mfgOffset),
+      expDate: addDays(b.expOffset),
+      cond: b.cond,
+      status: b.status,
+      semanticDesc: b.semanticDesc,
+    }));
 
     console.log(`📦 Inserting ${batches.length} Food Batches with dense vector embeddings...`);
     const batchInserts = [];
 
     for (let i = 0; i < batches.length; i++) {
       const b = batches[i];
+      process.stdout.write(`   [${i + 1}/${batches.length}] Embedding "${b.semanticDesc.slice(0, 35)}..."\r`);
       // Generate genuine 384-dim semantic vector
       const output = await extractor(b.semanticDesc, {
         pooling: 'mean',
@@ -751,6 +1285,7 @@ async function seed() {
       );
       batchInserts.push({ ...b, batch_id: res.rows[0].batch_id, vectorSql });
     }
+    console.log('\n   ✅ All batches embedded and inserted successfully!');
 
     // --------------------------------------------------------------------------
     // 8. SEED CLAIMS, DELIVERIES, FEEDBACK & WASTE RECORDS
@@ -777,7 +1312,7 @@ async function seed() {
       [claim1Id]
     );
 
-    // Claim 2: Pending claim on fresh sourdough batch (batch 3)
+    // Claim 2: Pending claim on fresh batch
     await client.query(
       `INSERT INTO CLAIMS (batch_id, food_bank_id, claim_date, quantity_claimed, status, pickup_required)
        VALUES (3, 2, CURRENT_DATE, 20, 'PENDING', FALSE)`
@@ -838,23 +1373,7 @@ INSERT INTO FOOD_DONATORS (donator_id, name, organization_name, donator_type, ph
 
 -- 3. FOOD CATALOG
 INSERT INTO FOOD (food_id, food_name, category, description, unit, storage_requirement, is_perishable) VALUES
-  (1, 'Fresh Whole Wheat Phulka / Chapati Packs (10-Pack)', 'BAKERY', 'Soft handmade whole wheat flatbreads, zero preservatives.', 'packets', 'AMBIENT', TRUE),
-  (2, 'Iyengar Bakery Masala Bread & Veg Puffs', 'BAKERY', 'Traditional Bangalore spiced onion-coriander bread loaves and potato puffs.', 'packets', 'AMBIENT', TRUE),
-  (3, 'Tandoori Roti & Naan Catering Trays', 'BAKERY', 'Clay-oven baked whole wheat rotis and leavened naans from wedding banquet.', 'packets', 'AMBIENT', TRUE),
-  (4, 'Fresh Malai Paneer Blocks (1kg)', 'DAIRY', 'Vacuum-sealed fresh cottage cheese blocks packed with vegetarian milk protein.', 'kg', 'REFRIGERATED', TRUE),
-  (5, 'Nandini Pasteurized Toned Milk Pouches', 'DAIRY', 'Fresh pasteurized cow milk sachets (1 Litre each) from Karnataka Milk Federation.', 'litres', 'REFRIGERATED', TRUE),
-  (6, 'Fresh Set Dahi / Curd Tubs (500g)', 'DAIRY', 'Probiotic-rich thick pasteurized fermented yogurt tubs.', 'packets', 'REFRIGERATED', TRUE),
-  (7, 'Organic Palak (Spinach) & Methi Greens', 'PRODUCE', 'Freshly harvested leafy greens rich in iron, vitamin A, and dietary fiber.', 'kg', 'REFRIGERATED', TRUE),
-  (8, 'Country Tomatoes & Red Onions (Bulk Sacks)', 'PRODUCE', 'Essential cooking produce in 20kg crates from APMC mandi.', 'kg', 'AMBIENT', TRUE),
-  (9, 'Fresh Ginger-Garlic Cooking Paste Tubs', 'PRODUCE', 'Pure ground ginger and garlic aromatics for high-volume community soup kitchens.', 'kg', 'REFRIGERATED', FALSE),
-  (10, 'Hyderabadi Vegetable Dum Biryani Trays', 'PREPARED_MEALS', 'Aromatic long-grain basmati rice cooked with seasonal vegetables and saffron.', 'servings', 'REFRIGERATED', TRUE),
-  (11, 'Homestyle Tadka Dal & Jeera Rice', 'PREPARED_MEALS', 'Nutritious yellow moong-toor lentil stew with cumin basmati rice.', 'servings', 'REFRIGERATED', TRUE),
-  (12, 'South Indian Sambar & Steamed Idlis', 'PREPARED_MEALS', 'Steamed fluffy fermented rice-lentil idlis served with vegetable tamarind stew.', 'servings', 'REFRIGERATED', TRUE),
-  (13, 'Paneer Butter Masala Catering Trays', 'PREPARED_MEALS', 'Rich cashew-tomato gravy with soft paneer cubes prepared for banquet dinner.', 'servings', 'REFRIGERATED', TRUE),
-  (14, 'Sona Masoori Raw Rice (25kg Sacks)', 'CANNED_GOODS', 'Premium Karnataka medium-grain polished white rice staple grain.', 'packets', 'AMBIENT', FALSE),
-  (15, 'Unpolished Toor Dal & Chana Dal (10kg Bags)', 'CANNED_GOODS', 'High-protein staple yellow lentils and split chickpeas.', 'packets', 'AMBIENT', FALSE),
-  (16, 'Roasted Peanut & Jaggery Chikki Bars', 'PACKAGED_SNACKS', 'Traditional high-energy roasted groundnut and unrefined jaggery brittle bars.', 'packets', 'AMBIENT', FALSE),
-  (17, 'Millet Ragi Sweet Biscuit Packs', 'PACKAGED_SNACKS', 'Finger millet baked biscuits with natural jaggery for children shelters.', 'packets', 'AMBIENT', FALSE);
+${foods.map((f, idx) => `  (${idx + 1}, '${f.name.replace(/'/g, "''")}', '${f.cat}', '${f.desc.replace(/'/g, "''")}', '${f.unit}', '${f.storage}', ${f.perishable ? 'TRUE' : 'FALSE'})`).join(',\n')};
 
 -- 4. FOOD_BANKS
 INSERT INTO FOOD_BANKS (food_bank_id, name, registration_no, contact_person, phone, email, address, city, latitude, longitude, storage_capacity_kg) VALUES
@@ -878,11 +1397,11 @@ INSERT INTO ROUTINES (transport_id, scheduled_day, scheduled_time, frequency, so
 
 -- 7. FOOD_BATCHES (includes 384-dimensional dense vectors)
 ${batchInserts
-  .map(
-    (b) => `INSERT INTO FOOD_BATCHES (batch_id, food_id, donator_id, quantity, available_quantity, donation_date, manufacturing_date, expiry_date, storage_condition, status, embedding)
+        .map(
+          (b) => `INSERT INTO FOOD_BATCHES (batch_id, food_id, donator_id, quantity, available_quantity, donation_date, manufacturing_date, expiry_date, storage_condition, status, embedding)
 VALUES (${b.batch_id}, ${b.foodId}, ${b.donorId}, ${b.qty}, ${b.avail}, '${b.donDate}', '${b.mfgDate}', '${b.expDate}', '${b.cond}', '${b.status}', '${b.vectorSql}');`
-  )
-  .join('\n')}
+        )
+        .join('\n')}
 
 -- 8. CLAIMS & DELIVERIES
 INSERT INTO CLAIMS (claim_id, batch_id, food_bank_id, claim_date, quantity_claimed, status, approved_date, pickup_required) VALUES
@@ -942,20 +1461,21 @@ SELECT setval('logs_log_id_seq', (SELECT MAX(log_id) FROM LOGS));
        JOIN FOOD f ON fb.food_id = f.food_id
        WHERE fb.status = 'AVAILABLE'
        ORDER BY fb.embedding <=> $1
-       LIMIT 3;`,
+       LIMIT 5;`,
       [queryVector]
     );
 
     console.log(`\nQuery: "${testQuery}"`);
     console.table(searchRes.rows);
+
+    console.log('\n🎉 Milestone 1 Database Seeding Complete!');
   } catch (err) {
-    console.error('❌ Error during seeding:', err);
-    throw err;
+    console.error('❌ Error during database seeding:', err);
+    process.exit(1);
   } finally {
     client.release();
     await pool.end();
   }
 }
 
-seed().catch(() => process.exit(1));
-
+seed();
