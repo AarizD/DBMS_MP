@@ -119,6 +119,3 @@ Update `DATABASE_URL` in `.env.local` with your local PostgreSQL credentials.
 * **FOOD_BANK**: Shelters and charities searching available food, performing semantic queries, and claiming batches.
 * **ADMIN**: University evaluators / system administrators managing users, routine logistics, and audit trails.
 * **DRIVER**: Logistics personnel handling transport vehicle assignments and delivery updates.
-=======
-# DBMS_MP
->>>>>>> 9223fc5dfbe4510d09b0ad96f3d2aa8096763d86
