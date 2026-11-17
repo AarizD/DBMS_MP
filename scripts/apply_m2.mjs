@@ -28,6 +28,16 @@ async function run() {
 
     console.log('🧪 RUNNING AUTOMATED VERIFICATION TESTS FOR MILESTONE 2:\n');
 
+    // Prepare test batch 3 to be fresh and available (ensures test idempotency)
+    await client.query(`
+      UPDATE FOOD_BATCHES 
+      SET available_quantity = 80,
+          quantity = 80,
+          status = 'AVAILABLE',
+          expiry_date = CURRENT_DATE + INTERVAL '5 days'
+      WHERE batch_id = 3;
+    `);
+
     // TEST 1: Atomic Claim Function with Pessimistic Locking
     console.log('--- Test 1: Successful Atomic Claim via fn_claim_food_batch ---');
     // Batch 3 is Fresh Chapatis (avail: 80). Claim 15 units for Food Bank 1.
@@ -53,6 +63,12 @@ async function run() {
 
     // TEST 3: Expired Batch Claim Rejection Test
     console.log('--- Test 3: Reject Claiming an Expired Batch (Batch #1) ---');
+    await client.query(`
+      UPDATE FOOD_BATCHES 
+      SET expiry_date = CURRENT_DATE - INTERVAL '2 days',
+          status = 'EXPIRED'
+      WHERE batch_id = 1;
+    `);
     const claimRes3 = await client.query(
       `SELECT * FROM fn_claim_food_batch(1, 1, 5, FALSE);`
     );
