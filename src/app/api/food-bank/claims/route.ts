@@ -66,3 +66,37 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch claims' }, { status: 500 });
   }
 }
+
+export async function PATCH(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized: Please log in' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { claimId, status } = body;
+
+    const validStatuses = ['PENDING', 'APPROVED', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'];
+    if (!validStatuses.includes(status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    }
+
+    const res = await query(
+      `UPDATE CLAIMS 
+       SET status = $1 
+       WHERE claim_id = $2
+       RETURNING *;`,
+      [status, claimId]
+    );
+
+    if (res.rowCount === 0) {
+      return NextResponse.json({ error: 'Claim not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, claim: res.rows[0] });
+  } catch (err: any) {
+    console.error('Error updating claim status:', err);
+    return NextResponse.json({ error: err?.message || 'Failed to update claim status' }, { status: 500 });
+  }
+}

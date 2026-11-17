@@ -73,6 +73,30 @@ export default function FoodBankPortal() {
   const [pickupRequired, setPickupRequired] = useState(false);
   const [claimSubmitting, setClaimSubmitting] = useState(false);
   const [claimResult, setClaimResult] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [updatingClaimId, setUpdatingClaimId] = useState<number | null>(null);
+
+  const handleUpdateClaimStatus = async (claimId: number, newStatus: string) => {
+    setUpdatingClaimId(claimId);
+    try {
+      const res = await fetch('/api/food-bank/claims', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claimId, status: newStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Failed to update claim status');
+        return;
+      }
+      setClaims((prev) =>
+        prev.map((c) => (c.claim_id === claimId ? { ...c, status: newStatus } : c))
+      );
+    } catch (err: any) {
+      alert(err.message || 'Error updating status');
+    } finally {
+      setUpdatingClaimId(null);
+    }
+  };
 
   useEffect(() => {
     if (authStatus === 'unauthenticated') {
@@ -389,6 +413,7 @@ export default function FoodBankPortal() {
                     <th className="py-3 px-4">Donor Outlet</th>
                     <th className="py-3 px-4">Claim Date</th>
                     <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -424,6 +449,40 @@ export default function FoodBankPortal() {
                         >
                           {c.status}
                         </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {c.status === 'DELIVERED' ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Received
+                          </span>
+                        ) : (
+                          <div className="flex items-center justify-end gap-1.5">
+                            {c.status !== 'IN_TRANSIT' && (
+                              <button
+                                onClick={() => handleUpdateClaimStatus(c.claim_id, 'IN_TRANSIT')}
+                                disabled={updatingClaimId === c.claim_id}
+                                className="px-2.5 py-1 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors disabled:opacity-50"
+                                title="Mark item as dispatched / in transit"
+                              >
+                                Dispatch
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleUpdateClaimStatus(c.claim_id, 'DELIVERED')}
+                              disabled={updatingClaimId === c.claim_id}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-md transition-colors shadow-sm disabled:opacity-50"
+                              title="Confirm package receipt"
+                            >
+                              {updatingClaimId === c.claim_id ? (
+                                <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              )}
+                              Mark Delivered
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
