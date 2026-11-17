@@ -84,12 +84,10 @@ export async function POST(req: Request) {
       )).rows[0];
 
       // Cleanup
-      await adminClient.query(`
-        DELETE FROM CLAIMS WHERE batch_id = $1;
-        DELETE FROM LOGS WHERE entity_reference = $1 AND entity_type = 'FOOD_BATCHES';
-        DELETE FROM FOOD_BATCHES WHERE batch_id = $1;
-        DELETE FROM FOOD_DONATORS WHERE donator_id = $2;
-      `, [batchId, donorId]);
+      await adminClient.query(`DELETE FROM CLAIMS WHERE batch_id = $1;`, [batchId]);
+      await adminClient.query(`DELETE FROM LOGS WHERE entity_reference = $1 AND entity_type = 'FOOD_BATCHES';`, [batchId]);
+      await adminClient.query(`DELETE FROM FOOD_BATCHES WHERE batch_id = $1;`, [batchId]);
+      await adminClient.query(`DELETE FROM FOOD_DONATORS WHERE donator_id = $1;`, [donorId]);
 
       const successCount = workerResults.filter((r) => r.success).length;
       const failureCount = workerResults.filter((r) => !r.success).length;
