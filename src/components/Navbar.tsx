@@ -13,7 +13,9 @@ import {
   LogIn, 
   UserPlus, 
   Sparkles,
-  Layers
+  Layers,
+  Database,
+  Zap
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -118,6 +120,18 @@ export default function Navbar() {
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 AI Smart Match
+              </Link>
+
+              <Link
+                href="/explorer"
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                  pathname.startsWith('/explorer')
+                    ? 'text-indigo-700 bg-indigo-50 font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-500" />
+                DB Explorer & ACID
               </Link>
             </nav>
           </div>

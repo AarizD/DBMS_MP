@@ -71,14 +71,22 @@ export async function GET() {
         ORDER BY tablename
       `),
 
-      // 5. Stored procedures / functions
+      // 5. Stored procedures / functions (filter to PL/pgSQL functions in public schema)
       query(`
-        SELECT routine_name, routine_type, data_type AS return_type,
+        SELECT p.proname AS routine_name,
+               CASE 
+                 WHEN p.prokind = 'p' THEN 'PROCEDURE'
+                 WHEN p.prokind = 'f' THEN 'FUNCTION'
+                 ELSE 'OTHER'
+               END AS routine_type,
+               pg_get_function_result(p.oid) AS return_type,
                pg_get_functiondef(p.oid) AS definition
-        FROM information_schema.routines r
-        JOIN pg_proc p ON p.proname = r.routine_name
-        WHERE r.specific_schema = 'public' AND r.routine_schema = 'public'
-        ORDER BY routine_name
+        FROM pg_proc p
+        JOIN pg_namespace n ON n.oid = p.pronamespace
+        WHERE n.nspname = 'public'
+          AND p.prokind IN ('f', 'p')
+          AND p.prolang = (SELECT oid FROM pg_language WHERE lanname = 'plpgsql')
+        ORDER BY p.proname
       `),
 
       // 6. Triggers
@@ -110,6 +118,6 @@ export async function GET() {
     });
   } catch (err: any) {
     console.error('Error fetching database schema:', err);
-    return NextResponse.json({ error: 'Failed to fetch database schema' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to fetch database schema' }, { status: 500 });
   }
 }

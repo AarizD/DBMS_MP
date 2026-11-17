@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { 
@@ -13,7 +14,8 @@ import {
   Building2, 
   HeartHandshake, 
   PackageCheck,
-  AlertOctagon
+  AlertOctagon,
+  Zap
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -136,6 +138,13 @@ export default function AdminDashboard() {
             )}
             Run Daily Expiry Sweeper
           </button>
+          <Link
+            href="/explorer"
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-300" />
+            ACID Concurrency Tester
+          </Link>
         </div>
       </div>
 
